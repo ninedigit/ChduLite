@@ -18,6 +18,7 @@
         <Company>Nine Digit, s.r.o.</Company>
         <Version>$(Version)</Version>
         <InformationalVersion>$(InformationalVersion)</InformationalVersion>
+        <PackageVersion>$(InformationalVersion)</PackageVersion>
         <PackageReleaseNotes></PackageReleaseNotes>
         <Description>Communication library for CHDÚ Lite device.</Description>
         <PackageDescription>Communication library for CHDÚ Lite device.</PackageDescription>
