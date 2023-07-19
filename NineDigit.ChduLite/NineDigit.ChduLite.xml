@@ -1,0 +1,607 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>NineDigit.ChduLite</name>
+    </assembly>
+    <members>
+        <member name="T:NineDigit.ChduLite.Chdu">
+            <summary>
+            Represents CHDU Lite device.
+            </summary>
+        </member>
+        <member name="M:NineDigit.ChduLite.Chdu.#ctor(System.String,System.Int32,System.TimeSpan)">
+            <summary>
+            </summary>
+            <param name="portName">Name of serial port.</param>
+            <param name="printerBaudRate">Serial printer communication speed.</param>
+            <param name="defaultTimeout"></param>
+        </member>
+        <member name="M:NineDigit.ChduLite.Chdu.#ctor(System.String,System.Int32,System.TimeSpan,Microsoft.Extensions.Logging.ILoggerFactory)">
+            <summary>
+            </summary>
+            <param name="portName">Name of serial port.</param>
+            <param name="printerBaudRate">Serial printer communication speed.</param>
+            <param name="defaultTimeout"></param>
+            <param name="loggerFactory">The logger factory</param>
+        </member>
+        <member name="P:NineDigit.ChduLite.Chdu.TransportConnection">
+            <summary>
+            Získa objekt poskytujúci stav transportnej vrstvy.
+            </summary>
+        </member>
+        <member name="M:NineDigit.ChduLite.Chdu.ReadBlockAsync(NineDigit.ChduLite.BlockAddress,System.Threading.CancellationToken)">
+            <summary>
+            Vyčítanie bloku na danej adrese.
+            </summary>
+            <param name="address">Adresa bloku</param>
+            <param name="cancellationToken"></param>
+            <returns>Blok</returns>
+        </member>
+        <member name="M:NineDigit.ChduLite.Chdu.ReadBlocksAsync(NineDigit.ChduLite.BlockAddress,System.UInt32,System.Threading.CancellationToken)">
+            <summary>
+            Vyčítanie blokov podľa počiatočnej adresy.
+            </summary>
+            <param name="address">Adresa prvého bloku</param>
+            <param name="blocksCount">Počet blokov na vyčítanie</param>
+            <param name="cancellationToken"></param>
+            <returns>Pole blokov</returns>
+        </member>
+        <member name="M:NineDigit.ChduLite.Chdu.WriteBlockAsync(NineDigit.ChduLite.BlockContent,System.Threading.CancellationToken)">
+            <summary>
+            Zapíše blok dát.
+            </summary>
+            <param name="blockContent">Blok dát na zapísanie</param>
+            <param name="cancellationToken"></param>
+            <returns>Adresa</returns>
+        </member>
+        <member name="M:NineDigit.ChduLite.Chdu.WriteAndPrintBlockAsync(NineDigit.ChduLite.BlockContent,System.Threading.CancellationToken)">
+            <summary>
+            Zapíše a kompletne vytlačí blok dát.
+            </summary>
+            <param name="blockContent">Blok dát na zapísanie a kompletné vytlačenie</param>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+        </member>
+        <member name="M:NineDigit.ChduLite.Chdu.WriteAndPrintBlockAsync(NineDigit.ChduLite.OffsettedBlockContent,System.Threading.CancellationToken)">
+            <summary>
+            Zapíše a čiastočn vytlačí blok dát.
+            </summary>
+            <param name="blockContent">Blok dát na zapísanie a čiastočné vytlačenie.</param>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+        </member>
+        <member name="M:NineDigit.ChduLite.Chdu.GetStatusAsync(System.Threading.CancellationToken)">
+            <summary>
+            Načítanie statusu
+            </summary>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+        </member>
+        <member name="M:NineDigit.ChduLite.Chdu.OpenDrawerAsync(NineDigit.ChduLite.DrawerPin,System.Threading.CancellationToken)">
+            <summary>
+            Otvorenie peňažnej zásuvky
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:NineDigit.ChduLite.Chdu.LockMemoryAsync(System.UInt32,System.Threading.CancellationToken)">
+            <summary>
+            Nevratné zamknutie CHDÚ
+            <para>
+            Funkcia je dostupná od firmvéru verzie 1.1 a novšej.
+            </para>
+            </summary>
+            <param name="magicNumber">Náhodné číslo</param>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+        </member>
+        <member name="M:NineDigit.ChduLite.Chdu.GetVolumeInfoAsync(System.Threading.CancellationToken)">
+            <summary>
+            Získa informácie o logickom zväzku dát.
+            <para>
+            Funkcia je dostupná od firmvéru verzie 1.1 a novšej.
+            </para>
+            </summary>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+        </member>
+        <member name="M:NineDigit.ChduLite.Chdu.GetFirmwareVersionDescriptionAsync(System.Threading.CancellationToken)">
+            <summary>
+            Navráti úplnú textovú reprezentáciu verzie firmvéru, vrátane tzv. patch segmentu.
+            V prípade developerskej verzie môže obsahovať aj git hash.
+            <para>
+            Napríklad: <code>v1.3.1.-4-gXXXXXXXX</code> označuje 4 aplikované patche, pričom git hash posledného z nich je gXXXXXXXX.
+            </para>
+            <para>
+            Funkcia je dostupná od firmvéru verzie 1.3 a novšej.
+            </para>
+            </summary>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+            <example>v1.3.1.-4-gXXXXXXX</example>
+        </member>
+        <member name="M:NineDigit.ChduLite.Chdu.Dispose">
+            <summary>
+            Disposes current instance and its internal transport layer.
+            </summary>
+        </member>
+        <member name="T:NineDigit.ChduLite.Commands.GetFirmwareVersionDescriptionCommand">
+            <summary>
+            Reads full firmware version description.
+            </summary>
+        </member>
+        <member name="M:NineDigit.ChduLite.ErrorCodeExtensions.IsClientError(NineDigit.ChduLite.ErrorCode)">
+            <summary>
+            Gets whether error code represents error caused
+            by client side (PC), not the server side (CHDU device)
+            </summary>
+            <param name="errorCode"></param>
+            <returns>
+            <c>null</c>, if error code is <see cref="F:NineDigit.ChduLite.ErrorCode.Unknown"/>,
+            <c>true</c>, if error code represents client error,
+            <c>false</c> otherwise.
+            </returns>
+        </member>
+        <member name="M:NineDigit.ChduLite.Helpers.EndiannessConverter.ToBigEndian(System.Int16)">
+            <summary>
+            Ensures that byte order of value is in big endian.
+            </summary>
+            <param name="value">Value with endiannes based on this computers architecture.</param>
+            <returns></returns>
+        </member>
+        <member name="M:NineDigit.ChduLite.Helpers.EndiannessConverter.ToLittleEndian(System.Int16)">
+            <summary>
+            Ensures that byte order of value is in little endian.
+            </summary>
+            <param name="value">Value with endiannes based on this computers architecture.</param>
+            <returns></returns>
+        </member>
+        <member name="M:NineDigit.ChduLite.Helpers.EndiannessConverter.FromBigEndian(System.Int16)">
+            <summary>
+            Ensures that value endiannes matches with this computer architecture.
+            </summary>
+            <param name="bigEndianValue">Big endian value</param>
+            <returns></returns>
+        </member>
+        <member name="M:NineDigit.ChduLite.Helpers.EndiannessConverter.FromLittleEndian(System.Int16)">
+            <summary>
+            Ensures that value endiannes matches with this computer architecture.
+            </summary>
+            <param name="littleEndianValue">Little endian value</param>
+            <returns></returns>
+        </member>
+        <member name="M:NineDigit.ChduLite.Helpers.EndiannessConverter.ToBigEndian(System.UInt16)">
+            <summary>
+            Ensures that byte order of value is in big endian.
+            </summary>
+            <param name="value">Value with endiannes based on this computers architecture.</param>
+            <returns></returns>
+        </member>
+        <member name="M:NineDigit.ChduLite.Helpers.EndiannessConverter.ToLittleEndian(System.UInt16)">
+            <summary>
+            Ensures that byte order of value is in little endian.
+            </summary>
+            <param name="value">Value with endiannes based on this computers architecture.</param>
+            <returns></returns>
+        </member>
+        <member name="M:NineDigit.ChduLite.Helpers.EndiannessConverter.FromBigEndian(System.UInt16)">
+            <summary>
+            Ensures that value endiannes matches with this computer architecture.
+            </summary>
+            <param name="bigEndianValue">Big endian value</param>
+            <returns></returns>
+        </member>
+        <member name="M:NineDigit.ChduLite.Helpers.EndiannessConverter.FromLittleEndian(System.UInt16)">
+            <summary>
+            Ensures that value endiannes matches with this computer architecture.
+            </summary>
+            <param name="littleEndianValue">Little endian value</param>
+            <returns></returns>
+        </member>
+        <member name="M:NineDigit.ChduLite.Helpers.EndiannessConverter.ToBigEndian(System.Int32)">
+            <summary>
+            Ensures that byte order of value is in big endian.
+            </summary>
+            <param name="value">Value with endiannes based on this computers architecture.</param>
+            <returns></returns>
+        </member>
+        <member name="M:NineDigit.ChduLite.Helpers.EndiannessConverter.ToLittleEndian(System.Int32)">
+            <summary>
+            Ensures that byte order of value is in little endian.
+            </summary>
+            <param name="value">Value with endiannes based on this computers architecture.</param>
+            <returns></returns>
+        </member>
+        <member name="M:NineDigit.ChduLite.Helpers.EndiannessConverter.FromBigEndian(System.Int32)">
+            <summary>
+            Ensures that value endiannes matches with this computer architecture.
+            </summary>
+            <param name="bigEndianValue">Big endian value</param>
+            <returns></returns>
+        </member>
+        <member name="M:NineDigit.ChduLite.Helpers.EndiannessConverter.FromLittleEndian(System.Int32)">
+            <summary>
+            Ensures that value endiannes matches with this computer architecture.
+            </summary>
+            <param name="littleEndianValue">Little endian value</param>
+            <returns></returns>
+        </member>
+        <member name="M:NineDigit.ChduLite.Helpers.EndiannessConverter.ToBigEndian(System.UInt32)">
+            <summary>
+            Ensures that byte order of value is in big endian.
+            </summary>
+            <param name="value">Value with endiannes based on this computers architecture.</param>
+            <returns></returns>
+        </member>
+        <member name="M:NineDigit.ChduLite.Helpers.EndiannessConverter.ToLittleEndian(System.UInt32)">
+            <summary>
+            Ensures that byte order of value is in little endian.
+            </summary>
+            <param name="value">Value with endiannes based on this computers architecture.</param>
+            <returns></returns>
+        </member>
+        <member name="M:NineDigit.ChduLite.Helpers.EndiannessConverter.FromBigEndian(System.UInt32)">
+            <summary>
+            Ensures that value endiannes matches with this computer architecture.
+            </summary>
+            <param name="bigEndianValue">Big endian value</param>
+            <returns></returns>
+        </member>
+        <member name="M:NineDigit.ChduLite.Helpers.EndiannessConverter.FromLittleEndian(System.UInt32)">
+            <summary>
+            Ensures that value endiannes matches with this computer architecture.
+            </summary>
+            <param name="littleEndianValue">Little endian value</param>
+            <returns></returns>
+        </member>
+        <member name="M:NineDigit.ChduLite.Helpers.EndiannessConverter.ToBigEndian(System.Int64)">
+            <summary>
+            Ensures that byte order of value is in big endian.
+            </summary>
+            <param name="value">Value with endiannes based on this computers architecture.</param>
+            <returns></returns>
+        </member>
+        <member name="M:NineDigit.ChduLite.Helpers.EndiannessConverter.ToLittleEndian(System.Int64)">
+            <summary>
+            Ensures that byte order of value is in little endian.
+            </summary>
+            <param name="value">Value with endiannes based on this computers architecture.</param>
+            <returns></returns>
+        </member>
+        <member name="M:NineDigit.ChduLite.Helpers.EndiannessConverter.FromBigEndian(System.Int64)">
+            <summary>
+            Ensures that value endiannes matches with this computer architecture.
+            </summary>
+            <param name="bigEndianValue">Big endian value</param>
+            <returns></returns>
+        </member>
+        <member name="M:NineDigit.ChduLite.Helpers.EndiannessConverter.FromLittleEndian(System.Int64)">
+            <summary>
+            Ensures that value endiannes matches with this computer architecture.
+            </summary>
+            <param name="littleEndianValue">Little endian value</param>
+            <returns></returns>
+        </member>
+        <member name="M:NineDigit.ChduLite.Helpers.EndiannessConverter.ToBigEndian(System.UInt64)">
+            <summary>
+            Ensures that byte order of value is in big endian.
+            </summary>
+            <param name="value">Value with endiannes based on this computers architecture.</param>
+            <returns></returns>
+        </member>
+        <member name="M:NineDigit.ChduLite.Helpers.EndiannessConverter.ToLittleEndian(System.UInt64)">
+            <summary>
+            Ensures that byte order of value is in little endian.
+            </summary>
+            <param name="value">Value with endiannes based on this computers architecture.</param>
+            <returns></returns>
+        </member>
+        <member name="M:NineDigit.ChduLite.Helpers.EndiannessConverter.FromBigEndian(System.UInt64)">
+            <summary>
+            Ensures that value endiannes matches with this computer architecture.
+            </summary>
+            <param name="bigEndianValue">Big endian value</param>
+            <returns></returns>
+        </member>
+        <member name="M:NineDigit.ChduLite.Helpers.EndiannessConverter.FromLittleEndian(System.UInt64)">
+            <summary>
+            Ensures that value endiannes matches with this computer architecture.
+            </summary>
+            <param name="littleEndianValue">Little endian value</param>
+            <returns></returns>
+        </member>
+        <member name="T:NineDigit.ChduLite.Block">
+            <summary>
+            Represents data between 1 and 505 bytes of an single block,
+            returned from the device.
+            </summary>
+        </member>
+        <member name="F:NineDigit.ChduLite.Block.MaxRawDataLength">
+            <summary>
+            Represents max raw length of block, as received from device when reading the block.
+            Content length (2B) + Command ID (1B) + content (up to 505B)
+            </summary>
+        </member>
+        <member name="P:NineDigit.ChduLite.Block.IsCrcValid">
+            <summary>
+            Gets whether data checksum is valid and block content is not malformed.
+            </summary>
+        </member>
+        <member name="M:NineDigit.ChduLite.Block.GetRawData">
+            <summary>
+            Returns payload in format as stored in storage.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:NineDigit.ChduLite.BlockAddress">
+            <summary>
+            Adresa bloku
+            </summary>
+        </member>
+        <member name="P:NineDigit.ChduLite.BlockContentBase.Length">
+            <summary>
+            Payload length
+            </summary>
+        </member>
+        <member name="M:NineDigit.ChduLite.OffsettedBlockContent.#ctor(System.UInt16,System.Byte[])">
+            <summary>
+            </summary>
+            <param name="offset">Number of bytes that sould not be printed.</param>
+            <param name="payload">Data to store and print.</param>
+        </member>
+        <member name="T:NineDigit.ChduLite.BlockWriteMode">
+            <summary>
+            Mód zápisu bloku
+            </summary>
+        </member>
+        <member name="F:NineDigit.ChduLite.BlockWriteMode.Save">
+            <summary>
+            Blok zapísaný v pamäťovom priestore úložiska.
+            </summary>
+        </member>
+        <member name="F:NineDigit.ChduLite.BlockWriteMode.SaveAndPrint">
+            <summary>
+            Blok zapísaný v pamäťovom priestore úložiska a zároveň vytlačený na tlačiareň
+            </summary>
+        </member>
+        <member name="T:NineDigit.ChduLite.BlockWriteResult">
+            <summary>
+            Výsledok zapísania bloku
+            </summary>
+        </member>
+        <member name="P:NineDigit.ChduLite.BlockWriteResult.Address">
+            <summary>
+            Adresa bloku, na ktorom bol vykonaný zápis.
+            </summary>
+        </member>
+        <member name="T:NineDigit.ChduLite.ChduLiteStatus">
+            <summary>
+            Status
+            </summary>
+        </member>
+        <member name="P:NineDigit.ChduLite.ChduLiteStatus.Version">
+            <summary>
+            Verzia firmvéru
+            </summary>
+        </member>
+        <member name="P:NineDigit.ChduLite.ChduLiteStatus.VersionString">
+            <summary>
+            Gets version prefixed with chatracter 'v' and two numeric segments.
+            </summary>
+        </member>
+        <member name="P:NineDigit.ChduLite.ChduLiteStatus.IsStorageReady">
+            <summary>
+            Zariadenie naštartovalo v poriadku a je pripravené na použitie.
+            </summary>
+        </member>
+        <member name="P:NineDigit.ChduLite.ChduLiteStatus.IsDeviceLocked">
+            <summary>
+            Zariadenie je uzamknuté, zápis nie je možný.
+            </summary>
+        </member>
+        <member name="P:NineDigit.ChduLite.ChduLiteStatus.IsReadOnly">
+            <summary>
+            Zariadenie je v stave, ktorý nepodporuje zápis.
+            Úložisko je uzamknuté (<see cref="P:NineDigit.ChduLite.ChduLiteStatus.IsDeviceLocked"/>), alebo dátové médium nie je pripravené na zápis (<see cref="P:NineDigit.ChduLite.ChduLiteStatus.IsStorageReady"/> je <c>false</c>)".
+            </summary>
+        </member>
+        <member name="P:NineDigit.ChduLite.ChduLiteStatus.IsPrinterReady">
+            <summary>
+            Tlačiareň je pripravená.
+            </summary>
+        </member>
+        <member name="P:NineDigit.ChduLite.ChduLiteStatus.IsPrinterInitializationInvalid">
+            <summary>
+            Konfigurácia portu RS232 je neplatná, výstup RS232 je neaktívny.
+            </summary>
+        </member>
+        <member name="P:NineDigit.ChduLite.ChduLiteStatus.SerialNumber">
+            <summary>
+            Unikátne sériové číslo zariadenia.
+            </summary>
+        </member>
+        <member name="M:NineDigit.ChduLite.ChduLiteStatus.GetTotalBlocksCount">
+            <summary>
+            Celková kapacita zariadenia, uvedená v blokoch.
+            </summary>
+            <returns></returns>
+            <exception cref="T:NineDigit.ChduLite.Exceptions.ChduLiteStorageNotReadyException">Ak <see cref="P:NineDigit.ChduLite.ChduLiteStatus.IsStorageReady"/> je <c>false</c></exception>
+        </member>
+        <member name="M:NineDigit.ChduLite.ChduLiteStatus.GetTotalSizeInBytes">
+            <summary>
+            Celková kapacita zariadenia, uvedená v bajtoch.
+            </summary>
+            <exception cref="T:NineDigit.ChduLite.Exceptions.ChduLiteStorageNotReadyException">Ak <see cref="P:NineDigit.ChduLite.ChduLiteStatus.IsStorageReady"/> je <c>false</c></exception>
+        </member>
+        <member name="P:NineDigit.ChduLite.ChduLiteStatus.FreeBlocksCount">
+            <summary>
+            Zostávajúca voľná kapacita zariadenia, uvedená v blokoch.
+            Nadobúda predvolenú hodnotu (0), ak <see cref="P:NineDigit.ChduLite.ChduLiteStatus.IsStorageReady"/> je <c>false</c>.
+            </summary>
+        </member>
+        <member name="M:NineDigit.ChduLite.ChduLiteStatus.GetFreeSpaceInBytes">
+            <summary>
+            Zostávajúca voľná kapacita zariadenia, uvedená v bajtoch.
+            </summary>
+            <exception cref="T:NineDigit.ChduLite.Exceptions.ChduLiteStorageNotReadyException">Ak <see cref="P:NineDigit.ChduLite.ChduLiteStatus.IsStorageReady"/> je <c>false</c></exception>
+        </member>
+        <member name="M:NineDigit.ChduLite.ChduLiteStatus.GetUsedBlocksCount">
+            <summary>
+            Použitá kapacita zariadenia, uvedená v blokoch.
+            </summary>
+            <exception cref="T:NineDigit.ChduLite.Exceptions.ChduLiteStorageNotReadyException">Ak <see cref="P:NineDigit.ChduLite.ChduLiteStatus.IsStorageReady"/> je <c>false</c></exception>
+        </member>
+        <member name="M:NineDigit.ChduLite.ChduLiteStatus.GetUsedSpaceInBytes">
+            <summary>
+            Použitá kapacita zariadenia, uvedená v bajtoch.
+            Nadobúda predvolenú hodnotu (0), ak <see cref="P:NineDigit.ChduLite.ChduLiteStatus.IsStorageReady"/> je <c>false</c>.
+            </summary>
+        </member>
+        <member name="M:NineDigit.ChduLite.ChduLiteStatus.GetBlockDataSizeInBytes">
+            <summary>
+            Veľkosť jedného bloku v byte-och (maximálna dátová kapacita jedného bloku).
+            </summary>
+        </member>
+        <member name="P:NineDigit.ChduLite.ChduLiteStatus.PrinterBaudRate">
+            <summary>
+            Nastavená rýchlosť pre tlačiareň
+            </summary>
+        </member>
+        <member name="F:NineDigit.ChduLite.ChduLiteStatusFlags.STORAGE_OK">
+            <summary>
+            Zariadenie naštartovalo v poriadku a je pripravené na použitie
+            </summary>
+        </member>
+        <member name="F:NineDigit.ChduLite.ChduLiteStatusFlags.PRINTER_READY">
+            <summary>
+            Tlačiareň je pripravená
+            </summary>
+        </member>
+        <member name="F:NineDigit.ChduLite.ChduLiteStatusFlags.DEVICE_LOCK">
+            <summary>
+            Zariadenie je uzamknuté, zápis nie je možný
+            </summary>
+        </member>
+        <member name="F:NineDigit.ChduLite.ChduLiteStatusFlags.RESERVED">
+            <summary>
+            Vyhradené pre interné použitie
+            </summary>
+        </member>
+        <member name="F:NineDigit.ChduLite.ChduLiteStatusFlags.PRINTER_INVALID">
+            <summary>
+            Konfigurácia portu RS232 je neplatná, výstup RS232 je neaktívny.
+            </summary>
+        </member>
+        <member name="T:NineDigit.ChduLite.ChduLiteVolumeInfo">
+            <summary>
+            Informácie o logickom zväzku dát.
+            </summary>
+        </member>
+        <member name="P:NineDigit.ChduLite.ChduLiteVolumeInfo.VolumeSerialNumber">
+            <summary>
+            Sériové číslo logického zväzku dát.
+            <para>
+            Pokiaľ nie je špecifikované inak, toto sériové číslo je pri výrobe naplnené časovou značkou (Unix epoch).
+            </para>
+            </summary>
+        </member>
+        <member name="M:NineDigit.ChduLite.ChduLiteVolumeInfo.GetManufacturingDateUtc">
+            <summary>
+            Získa časovú značku zo sériového čísla logického zväzku dát, vyjadrenú v UTC.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:NineDigit.ChduLite.ControlChars">
+            <summary>
+            Constants of used non-printable control characters.
+            </summary>
+        </member>
+        <member name="F:NineDigit.ChduLite.ControlChars.NUL">
+            <summary>
+            Null (0d / 0x00)
+            </summary>
+        </member>
+        <member name="F:NineDigit.ChduLite.ControlChars.STX">
+            <summary>
+            Start of text (2d / 0x02)
+            </summary>
+        </member>
+        <member name="F:NineDigit.ChduLite.ControlChars.EOT">
+            <summary>
+            End of transmission (4d / 0x04)
+            </summary>
+        </member>
+        <member name="F:NineDigit.ChduLite.ControlChars.ACK">
+            <summary>
+            Acknowledge (6d / 0x06)
+            </summary>
+        </member>
+        <member name="F:NineDigit.ChduLite.ControlChars.BEL">
+            <summary>
+            Bell (7d / 0x07)
+            </summary>
+        </member>
+        <member name="F:NineDigit.ChduLite.ControlChars.NAK">
+            <summary>
+            Negative acknowledge (21d / 0x15)
+            </summary>
+        </member>
+        <member name="F:NineDigit.ChduLite.ErrorCode.Timeout">
+            <summary>
+            Operation timeout
+            </summary>
+        </member>
+        <member name="F:NineDigit.ChduLite.ErrorCode.InvalidFrame">
+            <summary>
+            Invalid framing
+            </summary>
+        </member>
+        <member name="F:NineDigit.ChduLite.ErrorCode.InvalidCommand">
+            <summary>
+            Incalid command
+            </summary>
+        </member>
+        <member name="F:NineDigit.ChduLite.ErrorCode.InvalidParameter">
+            <summary>
+            Invalid command parameter (e.g. out of range)
+            </summary>
+        </member>
+        <member name="F:NineDigit.ChduLite.ErrorCode.InvalidCrc">
+            <summary>
+            Invalid checksum
+            </summary>
+        </member>
+        <member name="F:NineDigit.ChduLite.ErrorCode.InvalidReadAddress">
+            <summary>
+            The error raised when reading is attempted past the end of a memory.
+            </summary>
+        </member>
+        <member name="F:NineDigit.ChduLite.ErrorCode.MemoryLocked">
+            <summary>
+            System locked
+            </summary>
+        </member>
+        <member name="F:NineDigit.ChduLite.ErrorCode.HardwareFailure">
+            <summary>
+            Hardware failure (SD card communication failed)
+            </summary>
+        </member>
+        <member name="F:NineDigit.ChduLite.ErrorCode.PrinterNotReady">
+            <summary>
+            Printer not ready
+            </summary>
+        </member>
+        <member name="F:NineDigit.ChduLite.ErrorCode.Busy">
+            <summary>
+            Device is busy (processing another request).
+            </summary>
+        </member>
+        <member name="M:NineDigit.ChduLite.Transport.CommandTransport.ExecuteCommandAsync(NineDigit.ChduLite.Commands.ChduLiteCommand,System.Threading.CancellationToken)">
+            <summary>
+            Write data to CHDU
+            </summary>
+            <param name="command">Command to send</param>
+            <param name="cancellationToken">CancellationToken</param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>

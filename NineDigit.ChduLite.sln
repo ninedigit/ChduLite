@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NineDigit.ChduLite", "NineDigit.ChduLite\NineDigit.ChduLite.csproj", "{1C63E2E2-1603-4D7F-BF3F-B0ED0B5350D7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NineDigit.ChduLite.Examples", "NineDigit.ChduLite.Examples\NineDigit.ChduLite.Examples.csproj", "{87A1E294-098C-4EE7-B38F-1353B041C9B6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1C63E2E2-1603-4D7F-BF3F-B0ED0B5350D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1C63E2E2-1603-4D7F-BF3F-B0ED0B5350D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1C63E2E2-1603-4D7F-BF3F-B0ED0B5350D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1C63E2E2-1603-4D7F-BF3F-B0ED0B5350D7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{87A1E294-098C-4EE7-B38F-1353B041C9B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{87A1E294-098C-4EE7-B38F-1353B041C9B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{87A1E294-098C-4EE7-B38F-1353B041C9B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{87A1E294-098C-4EE7-B38F-1353B041C9B6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

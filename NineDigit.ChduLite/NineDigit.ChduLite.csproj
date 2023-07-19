@@ -1,0 +1,60 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <Import Project="..\CreateNuGetPackage.props" />
+    <Import Project="..\Versions.props" />
+    
+    <PropertyGroup>
+        <OutputType>Library</OutputType>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <ImplicitUsings>disable</ImplicitUsings>
+        <LangVersion>9.0</LangVersion>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <PackageId>NineDigit.ChduLite</PackageId>
+        <Title>CHDÚ Lite library</Title>
+        <Authors>Juraj Málach</Authors>
+        <Company>Nine Digit, s.r.o.</Company>
+        <Version>$(Version)</Version>
+        <InformationalVersion>$(InformationalVersion)</InformationalVersion>
+        <PackageReleaseNotes></PackageReleaseNotes>
+        <Description>Communication library for CHDÚ Lite device.</Description>
+        <PackageDescription>Communication library for CHDÚ Lite device.</PackageDescription>
+        <PackageTags>ekasa chdu lite</PackageTags>
+        <PackageProjectUrl>https://developer.ninedigit.sk/ekasa</PackageProjectUrl>
+        <RepositoryType>git</RepositoryType>
+        <RepositoryUrl>https://github.com/ninedigit/ChduLite.git</RepositoryUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+        <IncludeSymbols>true</IncludeSymbols>
+        <Copyright>(c) 2023</Copyright>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Remove="$(MSBuildProjectName).xml" />
+        <None Include="$(SolutionDir)README.md" Pack="true" PackagePath="\" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+            <_Parameter1>$(MSBuildProjectName).Tests</_Parameter1>
+        </AssemblyAttribute>
+    </ItemGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+        <NoWarn>CA1303;1701;1702</NoWarn>
+    </PropertyGroup>
+    
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <DocumentationFile>$(ProjectDir)$(OutputPath)$(MSBuildProjectName).xml</DocumentationFile>
+    </PropertyGroup>
+    
+    <ItemGroup>
+      <PackageReference Include="NineDigit.SerialTransport" Version="1.0.0-beta.11" />
+    </ItemGroup>
+
+</Project>
