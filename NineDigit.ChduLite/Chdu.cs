@@ -16,6 +16,7 @@ namespace NineDigit.ChduLite
     {
         readonly ITransport serialTransport;
         readonly ICommandTransport commandTransport;
+        readonly SemaphoreSlim commandLock = new(1, 1);
 
         /// <summary>
         /// </summary>
@@ -64,8 +65,7 @@ namespace NineDigit.ChduLite
         /// <returns>Blok</returns>
         public async Task<Block> ReadBlockAsync(BlockAddress address, CancellationToken cancellationToken)
         {
-            var blocks = await ReadBlocksAsync(address, 1, cancellationToken).ConfigureAwait(false);
-
+            var blocks = await ReadBlocksAsync(address, blocksCount: 1, cancellationToken).ConfigureAwait(false);
             return blocks[0];
         }
 
@@ -78,25 +78,34 @@ namespace NineDigit.ChduLite
         /// <returns>Pole blokov</returns>
         public async Task<Block[]> ReadBlocksAsync(BlockAddress address, uint blocksCount, CancellationToken cancellationToken)
         {
-            if (blocksCount < ReadBlocksCommand.MaxBlocksCount)
-            {
-                var cmd = new ReadBlocksCommand(address, blocksCount);
-                return await this.commandTransport.ExecuteCommandAsync(cmd, cancellationToken).ConfigureAwait(false);
-            }
+            await this.commandLock.WaitAsync(cancellationToken).ConfigureAwait(false);
 
-            var result = new Block[blocksCount];
-            var blocksProcessed = 0u;
-            while (blocksProcessed < blocksCount)
+            try
             {
-                var blocksToRead = Math.Min(blocksCount - blocksProcessed, ReadBlocksCommand.MaxBlocksCount);
-                var addr = address + blocksProcessed;
-                var cmd = new ReadBlocksCommand(addr, blocksToRead);
-                var blocks = await this.commandTransport.ExecuteCommandAsync(cmd, cancellationToken).ConfigureAwait(false);
-                blocks.CopyTo(result, index: blocksProcessed);
-                blocksProcessed += blocksToRead;
-            }
+                if (blocksCount < ReadBlocksCommand.MaxBlocksCount)
+                {
+                    var cmd = new ReadBlocksCommand(address, blocksCount);
+                    return await this.commandTransport.ExecuteCommandAsync(cmd, cancellationToken).ConfigureAwait(false);
+                }
 
-            return result;
+                var result = new Block[blocksCount];
+                var blocksProcessed = 0u;
+                while (blocksProcessed < blocksCount)
+                {
+                    var blocksToRead = Math.Min(blocksCount - blocksProcessed, ReadBlocksCommand.MaxBlocksCount);
+                    var addr = address + blocksProcessed;
+                    var cmd = new ReadBlocksCommand(addr, blocksToRead);
+                    var blocks = await this.commandTransport.ExecuteCommandAsync(cmd, cancellationToken).ConfigureAwait(false);
+                    blocks.CopyTo(result, index: blocksProcessed);
+                    blocksProcessed += blocksToRead;
+                }
+
+                return result;
+            }
+            finally
+            {
+                this.commandLock.Release();
+            }
         }
 
         /// <summary>
@@ -108,8 +117,7 @@ namespace NineDigit.ChduLite
         public Task<BlockWriteResult> WriteBlockAsync(BlockContent blockContent, CancellationToken cancellationToken)
         {
             var cmd = new WriteBlockCommand(blockContent, BlockWriteMode.Save);
-
-            return this.commandTransport.ExecuteCommandAsync(cmd, cancellationToken);
+            return LockAndExecuteSingleCommand(cmd, cancellationToken);
         }
 
         /// <summary>
@@ -121,8 +129,7 @@ namespace NineDigit.ChduLite
         public Task<BlockWriteResult> WriteAndPrintBlockAsync(BlockContent blockContent, CancellationToken cancellationToken)
         {
             var cmd = new WriteBlockCommand(blockContent, BlockWriteMode.SaveAndPrint);
-
-            return this.commandTransport.ExecuteCommandAsync(cmd, cancellationToken);
+            return LockAndExecuteSingleCommand(cmd, cancellationToken);
         }
 
         /// <summary>
@@ -134,8 +141,7 @@ namespace NineDigit.ChduLite
         public Task<BlockWriteResult> WriteAndPrintBlockAsync(OffsettedBlockContent blockContent, CancellationToken cancellationToken)
         {
             var cmd = new WriteBlockCommand(blockContent);
-
-            return this.commandTransport.ExecuteCommandAsync(cmd, cancellationToken);
+            return LockAndExecuteSingleCommand(cmd, cancellationToken);
         }
 
         /// <summary>
@@ -146,8 +152,7 @@ namespace NineDigit.ChduLite
         public Task<ChduLiteStatus> GetStatusAsync(CancellationToken cancellationToken)
         {
             var cmd = new GetDeviceStatusCommand();
-
-            return this.commandTransport.ExecuteCommandAsync(cmd, cancellationToken);
+            return LockAndExecuteSingleCommand(cmd, cancellationToken);
         }
 
         /// <summary>
@@ -157,8 +162,7 @@ namespace NineDigit.ChduLite
         public Task OpenDrawerAsync(DrawerPin drawerPin, CancellationToken cancellationToken)
         {
             var cmd = new OpenDrawerCommand(drawerPin);
-
-            return this.commandTransport.ExecuteCommandAsync(cmd, cancellationToken);
+            return LockAndExecuteSingleCommand(cmd, cancellationToken);
         }
 
         /// <summary>
@@ -172,15 +176,20 @@ namespace NineDigit.ChduLite
         /// <returns></returns>
         public async Task LockMemoryAsync(uint magicNumber, CancellationToken cancellationToken)
         {
-            var requestLockCommand = new RequestLockCommand(magicNumber);
+            await this.commandLock.WaitAsync(cancellationToken).ConfigureAwait(false);
 
-            var authCode = await this.commandTransport.ExecuteCommandAsync(requestLockCommand, cancellationToken)
-                .ConfigureAwait(false);
-
-            var activateLockCommand = new ActivateLockCommand(magicNumber, authCode);
-
-            await this.commandTransport.ExecuteCommandAsync(activateLockCommand, cancellationToken)
-                .ConfigureAwait(false);
+            try
+            {
+                var requestLockCommand = new RequestLockCommand(magicNumber);
+                var authCode = await this.commandTransport.ExecuteCommandAsync(requestLockCommand, cancellationToken).ConfigureAwait(false);
+                
+                var activateLockCommand = new ActivateLockCommand(magicNumber, authCode);
+                await this.commandTransport.ExecuteCommandAsync(activateLockCommand, cancellationToken).ConfigureAwait(false);
+            }
+            finally
+            {
+                this.commandLock.Release();
+            }
         }
 
         /// <summary>
@@ -194,8 +203,7 @@ namespace NineDigit.ChduLite
         public Task<ChduLiteVolumeInfo> GetVolumeInfoAsync(CancellationToken cancellationToken)
         {
             var cmd = new GetVolumeInfoCommand();
-
-            return this.commandTransport.ExecuteCommandAsync(cmd, cancellationToken);
+            return LockAndExecuteSingleCommand(cmd, cancellationToken);
         }
 
         /// <summary>
@@ -214,11 +222,47 @@ namespace NineDigit.ChduLite
         public Task<string> GetFirmwareVersionDescriptionAsync(CancellationToken cancellationToken)
         {
             var cmd = new GetFirmwareVersionDescriptionCommand();
-            return this.commandTransport.ExecuteCommandAsync(cmd, cancellationToken);
+            return LockAndExecuteSingleCommand(cmd, cancellationToken);
         }
 
+        #region Helpers
+        private async Task<TResponse> LockAndExecuteSingleCommand<TResponse>(ChduLiteCommand<TResponse> command, CancellationToken cancellationToken)
+        {
+            if (command is null)
+                throw new ArgumentNullException(nameof(command));
+
+            await this.commandLock.WaitAsync(cancellationToken).ConfigureAwait(false);
+
+            try
+            {
+                return await this.commandTransport.ExecuteCommandAsync(command, cancellationToken).ConfigureAwait(false);
+            }
+            finally
+            {
+                this.commandLock.Release();
+            }
+        }
+
+        private async Task LockAndExecuteSingleCommand(ChduLiteCommand command, CancellationToken cancellationToken)
+        {
+            if (command is null)
+                throw new ArgumentNullException(nameof(command));
+
+            await this.commandLock.WaitAsync(cancellationToken).ConfigureAwait(false);
+
+            try
+            {
+                await this.commandTransport.ExecuteCommandAsync(command, cancellationToken).ConfigureAwait(false);
+            }
+            finally
+            {
+                this.commandLock.Release();
+            }
+        }
+        #endregion
+
         #region IDisposable Support
-        private bool disposedValue = false;
+        private bool disposedValue;
 
         void Dispose(bool disposing)
         {
@@ -227,6 +271,7 @@ namespace NineDigit.ChduLite
                 if (disposing)
                 {
                     this.commandTransport.Dispose();
+                    this.commandLock.Dispose();
                 }
 
                 disposedValue = true;
