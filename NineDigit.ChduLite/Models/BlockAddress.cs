@@ -6,8 +6,7 @@ namespace NineDigit.ChduLite
     /// <summary>
     /// Adresa bloku
     /// </summary>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2225:Operator overloads have named alternates", Justification = "<Pending>")]
-    public struct BlockAddress : IEquatable<BlockAddress>, IComparable<BlockAddress>
+    public readonly struct BlockAddress : IEquatable<BlockAddress>, IComparable<BlockAddress>
     {
         readonly uint value;
 
@@ -17,7 +16,7 @@ namespace NineDigit.ChduLite
         }
 
         public static implicit operator BlockAddress(uint value)
-            => new BlockAddress(value);
+            => new(value);
 
         public static implicit operator uint(BlockAddress amount)
             => amount.value;
@@ -29,7 +28,7 @@ namespace NineDigit.ChduLite
             => value.GetHashCode();
 
         public override bool Equals(object obj)
-            => obj is BlockAddress && Equals((BlockAddress)obj);
+            => obj is BlockAddress o && Equals(o);
 
         public bool Equals(BlockAddress other)
             => Equals(this, other);

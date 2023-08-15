@@ -28,7 +28,7 @@ namespace NineDigit.ChduLite.Commands
 
         public override Block[] ProcessResponse(ResponseMessage[] messages)
         {
-            if (messages == null)
+            if (messages is null)
                 throw new ArgumentNullException(nameof(messages));
 
             if (messages.Length != this.ResponseBlocksCount)

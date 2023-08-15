@@ -14,7 +14,7 @@ namespace NineDigit.ChduLite
 
         internal ChduLiteStatus(ResponseMessage message)
         {
-            if (message == null)
+            if (message is null)
                 throw new ArgumentNullException(nameof(message));
 
             this.payload = message.GetPayloadContent();
@@ -28,7 +28,7 @@ namespace NineDigit.ChduLite
         /// <summary>
         /// Verzia firmvéru
         /// </summary>
-        public Version Version => new Version(payload[1], payload[0]);
+        public Version Version => new(payload[1], payload[0]);
 
         /// <summary>
         /// Gets version prefixed with chatracter 'v' and two numeric segments.

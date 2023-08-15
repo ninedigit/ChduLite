@@ -52,7 +52,7 @@ namespace NineDigit.ChduLite
 
         public static bool TryParsePayloadLength(byte[] data, out int payloadLength)
         {
-            if (data == null)
+            if (data is null)
                 throw new ArgumentNullException(nameof(data));
 
             if (data.Length < 2)

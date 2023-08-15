@@ -16,7 +16,7 @@ namespace NineDigit.ChduLite.Commands
 
         public override string ProcessResponse(ResponseMessage[] response)
         {
-            if (response == null)
+            if (response is null)
                 throw new ArgumentNullException(nameof(response));
 
             if (response.Length != this.ResponseBlocksCount)
@@ -28,7 +28,7 @@ namespace NineDigit.ChduLite.Commands
             var data = firstBlock.GetPayloadContent(0, length: firstBlock.PayloadLength - 1);
             var result = Encoding.ASCII.GetString(data)?.Trim();
 
-            return result;
+            return result ?? throw new InvalidOperationException("Non-empty firmware version expected.");
         }
     }
 }

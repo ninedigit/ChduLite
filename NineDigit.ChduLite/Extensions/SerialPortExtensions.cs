@@ -9,7 +9,7 @@ namespace NineDigit.ChduLite
     {
         public static async Task<byte> ReadByteAsync(this Stream self, CancellationToken cancellationToken)
         {
-            if (self == null)
+            if (self is null)
                 throw new ArgumentNullException(nameof(self));
 
             var tmp = new byte[1];

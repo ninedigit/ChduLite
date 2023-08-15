@@ -20,17 +20,11 @@ namespace NineDigit.ChduLite
     internal static class BlockWriteModeExtensions
     {
         public static BlockWriteMode ToBlockWriteMode(this ChduLiteCommandId self)
-        {
-            switch (self)
+            => self switch
             {
-                case ChduLiteCommandId.WriteData:
-                    return BlockWriteMode.Save;
-                case ChduLiteCommandId.WriteDataAndPrint:
-                case ChduLiteCommandId.WriteDataAndPrintWithOffset:
-                    return BlockWriteMode.SaveAndPrint;
-                default:
-                    throw new InvalidOperationException($"Command ID {self} cannot be converted to block write mode.");
-            }
-        }
+                ChduLiteCommandId.WriteData => BlockWriteMode.Save,
+                ChduLiteCommandId.WriteDataAndPrint or ChduLiteCommandId.WriteDataAndPrintWithOffset => BlockWriteMode.SaveAndPrint,
+                _ => throw new InvalidOperationException($"Command ID {self} cannot be converted to block write mode."),
+            };
     }
 }

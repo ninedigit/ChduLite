@@ -11,7 +11,7 @@ namespace NineDigit.ChduLite
 
         internal BlockContentBase(byte[] payload)
         {
-            if (payload == null)
+            if (payload is null)
                 throw new ArgumentNullException(nameof(payload));
 
             this.payload = payload.ToList().AsReadOnly();
@@ -31,7 +31,7 @@ namespace NineDigit.ChduLite
 
         public void WriteTo(Stream stream, int offset, int count)
         {
-            if (stream == null)
+            if (stream is null)
                 throw new ArgumentNullException(nameof(stream));
 
             var payload = GetPayload();
@@ -49,7 +49,7 @@ namespace NineDigit.ChduLite
         public BlockContent(byte[] payload)
             : base(payload)
         {
-            if (payload == null)
+            if (payload is null)
                 throw new ArgumentNullException(nameof(payload));
 
             if (payload.Length < MinLength)

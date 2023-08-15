@@ -28,7 +28,7 @@ namespace NineDigit.ChduLite.Commands
 
         public sealed override BlockWriteResult ProcessResponse(ResponseMessage[] response)
         {
-            if (response == null)
+            if (response is null)
                 throw new ArgumentNullException(nameof(response));
 
             if (response.Length != ResponseBlocksCount)
@@ -38,16 +38,11 @@ namespace NineDigit.ChduLite.Commands
         }
 
         private static ChduLiteCommandId GetCommandId(BlockWriteMode writeMode)
-        {
-            switch (writeMode)
+            => writeMode switch
             {
-                case BlockWriteMode.Save:
-                    return ChduLiteCommandId.WriteData;
-                case BlockWriteMode.SaveAndPrint:
-                    return ChduLiteCommandId.WriteDataAndPrint;
-                default:
-                    throw new NotImplementedException();
-            }
-        }
+                BlockWriteMode.Save => ChduLiteCommandId.WriteData,
+                BlockWriteMode.SaveAndPrint => ChduLiteCommandId.WriteDataAndPrint,
+                _ => throw new NotImplementedException(),
+            };
     }
 }

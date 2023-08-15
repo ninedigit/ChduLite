@@ -9,16 +9,11 @@ namespace NineDigit.ChduLite.Commands
         { }
 
         private static ChduLiteCommandId GetCommandId(DrawerPin drawerPin)
-        {
-            switch (drawerPin)
+            => drawerPin switch
             {
-                case DrawerPin.Pin2:
-                    return ChduLiteCommandId.OpenDrawer;
-                case DrawerPin.Pin5:
-                    return ChduLiteCommandId.OpenDrawer2;
-                default:
-                    throw new NotImplementedException();
-            }
-        }
+                DrawerPin.Pin2 => ChduLiteCommandId.OpenDrawer,
+                DrawerPin.Pin5 => ChduLiteCommandId.OpenDrawer2,
+                _ => throw new NotImplementedException(),
+            };
     }
 }
