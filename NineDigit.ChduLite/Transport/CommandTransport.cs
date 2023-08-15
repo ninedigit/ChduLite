@@ -27,11 +27,9 @@ namespace NineDigit.ChduLite.Transport
 
         public async Task<TResponse> ExecuteCommandAsync<TResponse>(ChduLiteCommand<TResponse> command, CancellationToken cancellationToken)
         {
-            await this.ExecuteCommandAsync(command as ChduLiteCommand, cancellationToken)
-                .ConfigureAwait(false);
-
-            var response = await this.ReadCommandResponseAsync(command.ResponseBlocksCount, cancellationToken)
-                .ConfigureAwait(false);
+            await this.ExecuteCommandAsync(command as ChduLiteCommand, cancellationToken).ConfigureAwait(false);
+            
+            var response = await this.ReadCommandResponseAsync(command.ResponseBlocksCount, cancellationToken).ConfigureAwait(false);
 
             return command.ProcessResponse(response);
         }
@@ -84,10 +82,21 @@ namespace NineDigit.ChduLite.Transport
 
                 throw;
             }
+            catch (WriteTransportException ex)
+            {
+                throw new ChduLiteTransportException("Chyba pri odosielaní údajov na dátové úložisko.", ex);
+            }
+            catch (BusyPortException ex)
+            {
+                throw new ChduLiteTransportException("Aplikácia nedokáže nadviazať spojenie s dátovým úložiskom, pretože spojenie je obsadené inou aplikáciou.", ex);
+            }
+            catch (TransportException ex) when (ex.InnerException is FileNotFoundException)
+            {
+                throw new ChduLiteTransportException($"Aplikácia nedokáže nadviazať spojenie s dátovym úložiskom. Uistite sa, že úložisko je pripojené na porte {ex.PortName}.", ex);
+            }
             catch (TransportException ex)
             {
-                this.logger.LogError(ex, "Nastala transportná chyba pri komunikácii s chráneným dátovým úložiskom.");
-                throw;
+                throw new ChduLiteTransportException("Nastala transportná chyba pri komunikácii s chráneným dátovým úložiskom.", ex);
             }
         }
 
@@ -99,8 +108,6 @@ namespace NineDigit.ChduLite.Transport
 
             try
             {
-                // this.logger.LogDebug("Reading command response with expected blocks count of '{expectedBlocksCount}'.", expectedBlocksCount);
-
                 for (int currentBlockIndex = 0; currentBlockIndex < expectedBlocksCount; currentBlockIndex++)
                 {
                     var currentBlock = new byte[Block.MaxRawDataLength];
@@ -165,6 +172,18 @@ namespace NineDigit.ChduLite.Transport
 
                 this.transport.DiscardBuffers();
             }
+            catch (WriteTransportException ex)
+            {
+                throw new ChduLiteTransportException("Chyba pri odosielaní údajov na dátové úložisko.", ex);
+            }
+            catch (BusyPortException ex)
+            {
+                throw new ChduLiteTransportException("Aplikácia nedokáže nadviazať spojenie s dátovým úložiskom, pretože spojenie je obsadené inou aplikáciou.", ex);
+            }
+            catch (TransportException ex) when (ex.InnerException is FileNotFoundException)
+            {
+                throw new ChduLiteTransportException($"Aplikácia nedokáže nadviazať spojenie s dátovym úložiskom. Uistite sa, že úložisko je pripojené na porte {ex.PortName}.", ex);
+            }
             catch (TransportException ex)
             {
                 this.logger.LogError(ex, "Nastala transportná chyba pri čítaní odpovede z dátového úložiska.");
@@ -172,20 +191,19 @@ namespace NineDigit.ChduLite.Transport
             }
             catch (TimeoutException ex)
             {
-                var message = $"Čítanie odpovede z dátového úložiska nebolo dokončené v stanovenom časovom limite.";
+                const string message = "Čítanie odpovede z dátového úložiska nebolo dokončené v stanovenom časovom limite.";
                 this.logger.LogError(ex, message);
-                // this.CloseAndSetDisconnected(ex);
                 throw new ChduLiteTransportException(message, ex);
             }
             catch (OperationCanceledException ex)
             {
-                var message = "Čítanie odpovede z dátového úložiska bolo prerušené.";
+                const string message = "Čítanie odpovede z dátového úložiska bolo prerušené.";
                 this.logger.LogError(ex, message);
                 throw new ChduLiteTransportException(message, ex);
             }
             catch (Exception ex)
             {
-                var message = "Nastala chyba pri čítaní odpovede z dátového úložiska.";
+                const string message = "Nastala chyba pri čítaní odpovede z dátového úložiska.";
                 this.logger.LogError(ex, message);
                 throw new ChduLiteTransportException(message, ex);
             }
