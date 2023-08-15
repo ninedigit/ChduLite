@@ -16,6 +16,7 @@ namespace NineDigit.ChduLite
     {
         readonly ITransport serialTransport;
         readonly ICommandTransport commandTransport;
+        readonly ICommandTransportInitializer commandTransportInitializer;
         readonly SemaphoreSlim commandLock = new(1, 1);
 
         /// <summary>
@@ -34,22 +35,15 @@ namespace NineDigit.ChduLite
         /// <param name="defaultTimeout"></param>
         /// <param name="loggerFactory">The logger factory</param>
         public Chdu(string portName, int printerBaudRate, TimeSpan defaultTimeout, ILoggerFactory loggerFactory)
+            : this(CreateSerialTransport(portName, printerBaudRate, defaultTimeout, loggerFactory), ownsTransport: true, loggerFactory)
         {
-            var opts = new SerialPortOptions()
-            {
-                BaudRate = printerBaudRate,
-                ReadTimeout = defaultTimeout,
-                WriteTimeout = defaultTimeout
-            };
-            
-            this.serialTransport = TransportFactory.CreateSerialTransport(portName, opts, loggerFactory);
-            this.commandTransport = new CommandTransport(this.serialTransport, ownsTransport: true, loggerFactory);
         }
-
-        public Chdu(ITransport transport, bool ownsTransport, ILoggerFactory loggerFactory)
+        
+        internal Chdu(ITransport transport, bool ownsTransport, ILoggerFactory loggerFactory)
         {
             this.serialTransport = transport ?? throw new ArgumentNullException(nameof(transport));
-            this.commandTransport = new CommandTransport(transport, ownsTransport, loggerFactory);
+            this.commandTransportInitializer = new CommandTransportInitializer(transport);
+            this.commandTransport = new CommandTransport(transport, ownsTransport, this.commandTransportInitializer, loggerFactory);
         }
 
         /// <summary>
@@ -133,7 +127,7 @@ namespace NineDigit.ChduLite
         }
 
         /// <summary>
-        /// Zapíše a čiastočn vytlačí blok dát.
+        /// Zapíše a čiastočne vytlačí blok dát.
         /// </summary>
         /// <param name="blockContent">Blok dát na zapísanie a čiastočné vytlačenie.</param>
         /// <param name="cancellationToken"></param>
@@ -226,6 +220,7 @@ namespace NineDigit.ChduLite
         }
 
         #region Helpers
+
         private async Task<TResponse> LockAndExecuteSingleCommand<TResponse>(ChduLiteCommand<TResponse> command, CancellationToken cancellationToken)
         {
             if (command is null)
@@ -259,6 +254,19 @@ namespace NineDigit.ChduLite
                 this.commandLock.Release();
             }
         }
+
+        private static ITransport CreateSerialTransport(string portName, int printerBaudRate, TimeSpan defaultTimeout, ILoggerFactory loggerFactory)
+        {
+            var opts = new SerialPortOptions()
+            {
+                BaudRate = printerBaudRate,
+                ReadTimeout = defaultTimeout,
+                WriteTimeout = defaultTimeout
+            };
+
+            return TransportFactory.CreateSerialTransport(portName, opts, loggerFactory);
+        }
+
         #endregion
 
         #region IDisposable Support
@@ -270,6 +278,7 @@ namespace NineDigit.ChduLite
             {
                 if (disposing)
                 {
+                    this.commandTransportInitializer.Dispose();
                     this.commandTransport.Dispose();
                     this.commandLock.Dispose();
                 }

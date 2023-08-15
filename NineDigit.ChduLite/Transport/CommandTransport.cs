@@ -9,19 +9,21 @@ using System.Threading.Tasks;
 
 namespace NineDigit.ChduLite.Transport
 {
-    internal class CommandTransport : ICommandTransport
+    internal sealed class CommandTransport : ICommandTransport
     {
         readonly bool ownsTransport;
         readonly ITransport transport;
+        readonly ICommandTransportInitializer initializer;
         readonly ILogger logger;
 
-        public CommandTransport(ITransport transport, bool ownsTransport, ILoggerFactory loggerFactory)
+        public CommandTransport(ITransport transport, bool ownsTransport, ICommandTransportInitializer initializer, ILoggerFactory loggerFactory)
         {
             if (loggerFactory is null)
                 throw new ArgumentNullException(nameof(loggerFactory));
 
             this.ownsTransport = ownsTransport;
             this.transport = transport ?? throw new ArgumentNullException(nameof(transport));
+            this.initializer = initializer ?? throw new ArgumentNullException(nameof(initializer));
             this.logger = loggerFactory.CreateLogger<CommandTransport>();
         }
 
@@ -35,7 +37,7 @@ namespace NineDigit.ChduLite.Transport
         }
 
         /// <summary>
-        /// Write data to CHDU
+        /// Writes data to CHDU
         /// </summary>
         /// <param name="command">Command to send</param>
         /// <param name="cancellationToken">CancellationToken</param>
@@ -51,6 +53,13 @@ namespace NineDigit.ChduLite.Transport
             
             try
             {
+                if (this.initializer.IsInitializationPending)
+                {
+                    this.logger.LogDebug("Executing transport initialization.");
+                    await this.initializer.InitializeAsync(this, cancellationToken).ConfigureAwait(false);
+                    this.logger.LogDebug("Transport initialization successful.");
+                }
+
                 var responseArray = await this.transport.WriteAndReadAsync(dataToWrite, responseLength: 1, cancellationToken).ConfigureAwait(false);
                 var response = responseArray[0];
 
@@ -214,7 +223,7 @@ namespace NineDigit.ChduLite.Transport
         #region IDisposable
         private bool disposedValue;
 
-        protected virtual void Dispose(bool disposing)
+        private void Dispose(bool disposing)
         {
             if (!disposedValue)
             {
