@@ -17,42 +17,52 @@ namespace NineDigit.ChduLite.Transport
         {
             this.serialTransport = serialTransport ?? throw new ArgumentNullException(nameof(serialTransport));
             this.serialTransport.StateChanged += OnSerialTransportStateChanged;
-            this.IsInitializationPending = true;
         }
 
         #region Event handlers
         private void OnSerialTransportStateChanged(object sender, TransportConnectionStateChange e)
         {
             if (e.NewState == TransportConnectionState.Disconnected)
-                this.IsInitializationPending = true;
+                this.IsInitialized = false;
         }
         #endregion
 
-        public bool IsInitializationPending { get; private set; }
+        public bool IsInitialized { get; private set; }
+        public bool IsInitializing { get; private set; }
+        public bool IsInitializationPending => !IsInitialized && !IsInitializing;
 
         public async Task InitializeAsync(ICommandTransport commandTransport, CancellationToken cancellationToken)
         {
-            await this.serialTransport.ExecuteSoftResetAsync(cancellationToken).ConfigureAwait(false);
-
-            // use device status command execution as "connection check"
-            var command = new GetDeviceStatusCommand();
-
-            for (int i = 0; i < MaxConnectionCheckAttempts; i++)
+            try
             {
-                try
+                this.IsInitializing = true;
+
+                await this.serialTransport.ExecuteSoftResetAsync(cancellationToken).ConfigureAwait(false);
+
+                // use device status command execution as "connection check"
+                var command = new GetDeviceStatusCommand();
+
+                for (int i = 0; i < MaxConnectionCheckAttempts; i++)
                 {
-                    await commandTransport.ExecuteCommandAsync(command, cancellationToken).ConfigureAwait(false);
-                    this.IsInitializationPending = false;
-                    return;
+                    try
+                    {
+                        await commandTransport.ExecuteCommandAsync(command, cancellationToken).ConfigureAwait(false);
+                        this.IsInitialized = true;
+                        return;
+                    }
+                    catch (CommandFailedException) when (i < MaxConnectionCheckAttempts - 1)
+                    {
+                        // ignore command failed exception, unless max attempt is reached.
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new ChduLiteTransportException("Inicializácia spojenia s chráneným dátovým úložiskom nebola úspešná.", ex);
+                    }
                 }
-                catch (CommandFailedException) when (i < MaxConnectionCheckAttempts - 1)
-                {
-                    // ignore command failed exception, unless max attempt is reached.
-                }
-                catch (Exception ex)
-                {
-                    throw new ChduLiteTransportException("Inicializácia spojenia s chráneným dátovým úložiskom nebola úspešná.", ex);
-                }
+            }
+            finally
+            {
+                this.IsInitializing = false;
             }
         }
 
