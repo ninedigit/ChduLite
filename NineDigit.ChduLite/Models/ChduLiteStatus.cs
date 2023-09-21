@@ -23,12 +23,13 @@ namespace NineDigit.ChduLite
                 throw new ArgumentException("Unexpected response message payload length", nameof(message));
 
             this.flags = (ChduLiteStatusFlags)BitConverter.ToUInt16(payload, 2);
+            this.Version = new(payload[1], payload[0]);
         }
 
         /// <summary>
         /// Verzia firmvéru
         /// </summary>
-        public Version Version => new(payload[1], payload[0]);
+        public Version Version { get; }
 
         /// <summary>
         /// Gets version prefixed with chatracter 'v' and two numeric segments.
@@ -59,7 +60,50 @@ namespace NineDigit.ChduLite
         /// <summary>
         /// Konfigurácia portu RS232 je neplatná, výstup RS232 je neaktívny.
         /// </summary>
-        public bool IsPrinterInitializationInvalid => this.flags.HasFlag(ChduLiteStatusFlags.PRINTER_INVALID);
+        public bool? IsPrinterInitializationInvalid => this.flags.HasFlag(ChduLiteStatusFlags.PRINTER_INVALID);
+
+        /// <summary>
+        /// Inidkuje, či dvierka na tlačiarni sú otvorené.
+        /// <para>
+        /// Vráti hodnotu <c>null</c> v prípade, ak táto informácia nie je podporovaná vo verzii firmvéru použitom na zariadení.
+        /// </para>
+        /// </summary>
+        public bool? IsPrinterPaperCoverOpen => this.GetSupportedStatusFlagOrNull(ChduLiteStatusFlags.PRINTER_COVER_OPEN);
+
+        /// <summary>
+        /// Na tlačiarni je stlačené tlačidlo "FEED".
+        /// <para>
+        /// Vráti hodnotu <c>null</c> v prípade, ak táto informácia nie je podporovaná vo verzii firmvéru použitom na zariadení.
+        /// </para>
+        /// </summary>
+        public bool? IsPrinterFeedButtonPressed => this.GetSupportedStatusFlagOrNull(ChduLiteStatusFlags.PRINTER_FEED_BTN);
+
+        /// <summary>
+        /// Nízky stav papiera v tlačiarni 
+        /// <para>
+        /// Vráti hodnotu <c>null</c> v prípade, ak táto informácia nie je podporovaná vo verzii firmvéru použitom na zariadení.
+        /// </para>
+        /// </summary>
+        public bool? IsPrinterPaperLow => this.GetSupportedStatusFlagOrNull(ChduLiteStatusFlags.PRINTER_PAPER_LOW);
+
+        /// <summary>
+        /// Chýbajúci papier v tlačiarni.
+        /// <para>
+        /// Vráti hodnotu <c>null</c> v prípade, ak táto informácia nie je podporovaná vo verzii firmvéru použitom na zariadení.
+        /// </para>
+        /// </summary>
+        public bool? IsPrinterPaperEmpty => this.GetSupportedStatusFlagOrNull(ChduLiteStatusFlags.PRINTER_PAPER_END);
+
+        /// <summary>
+        /// Tlačiareň hlási chybový stav.
+        /// <para>
+        /// Vráti hodnotu <c>null</c> v prípade, ak táto informácia nie je podporovaná vo verzii firmvéru použitom na zariadení.
+        /// </para>
+        /// </summary>
+        public bool? IsPrinterInErrorState => this.GetSupportedStatusFlagOrNull(ChduLiteStatusFlags.PRINTER_ERROR);
+
+        private bool? GetSupportedStatusFlagOrNull(ChduLiteStatusFlags flag)
+            => flag.IsSupportedIn(this.Version) ? this.flags.HasFlag(flag) : null;
 
         /// <summary>
         /// Unikátne sériové číslo zariadenia.

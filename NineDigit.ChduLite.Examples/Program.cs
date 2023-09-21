@@ -1,20 +1,36 @@
 ﻿// let's use more stricter 10 ms (instead of config default value 1200 ms).
 
-using System.Diagnostics;
 using NineDigit.ChduLite;
+using System.Diagnostics;
 
-var timeout = TimeSpan.FromMilliseconds(10);
+var timeout = TimeSpan.FromMilliseconds(1200);
 
-using var chdu = new Chdu("COM4", 38400, timeout); // /dev/ttyS0
+using var chdu = new Chdu("COM11", 38400, timeout); // /dev/ttyS0
 
 var cancellationToken = CancellationToken.None;
 var status = await chdu.GetStatusAsync(cancellationToken).ConfigureAwait(true);
-var firmwareVersionDescription = await chdu.GetFirmwareVersionDescriptionAsync(cancellationToken);
-var count = status.GetUsedBlocksCount();
 
+Console.WriteLine("Status flags: ");
+Console.WriteLine(" - " + nameof(status.IsStorageReady) + ": " + status.IsStorageReady);
+Console.WriteLine(" - " + nameof(status.IsDeviceLocked) + ": " + status.IsDeviceLocked);
+Console.WriteLine(" - " + nameof(status.IsPrinterReady) + ": " + status.IsPrinterReady);
+Console.WriteLine(" - " + nameof(status.IsPrinterInitializationInvalid) + ": " + status.IsPrinterInitializationInvalid);
+Console.WriteLine(" - " + nameof(status.IsPrinterPaperCoverOpen) + ": " + status.IsPrinterPaperCoverOpen);
+Console.WriteLine(" - " + nameof(status.IsPrinterFeedButtonPressed) + ": " + status.IsPrinterFeedButtonPressed);
+Console.WriteLine(" - " + nameof(status.IsPrinterPaperLow) + ": " + status.IsPrinterPaperLow);
+Console.WriteLine(" - " + nameof(status.IsPrinterPaperEmpty) + ": " + status.IsPrinterPaperEmpty);
+Console.WriteLine(" - " + nameof(status.IsPrinterInErrorState) + ": " + status.IsPrinterInErrorState);
+Console.WriteLine("Firmware: ");
+Console.WriteLine(" - " + nameof(status.Version) + ": " + status.Version);
+Console.WriteLine(" - " + nameof(status.VersionString) + ": " + status.VersionString);
+var firmwareVersionDescription = await chdu.GetFirmwareVersionDescriptionAsync(cancellationToken);
+Console.WriteLine($" - Firmware description: {firmwareVersionDescription}");
+Console.WriteLine("Volume info: ");
 var volumeInfo = await chdu.GetVolumeInfoAsync(cancellationToken).ConfigureAwait(true);
 var manufacturingDate = volumeInfo.GetManufacturingDateUtc();
-Console.WriteLine($"Manufacturing date: {manufacturingDate}");
+Console.WriteLine($" - Manufacturing date: {manufacturingDate}");
+
+var count = status.GetUsedBlocksCount();
 
 //try
 //{
