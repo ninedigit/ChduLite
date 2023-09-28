@@ -9,7 +9,6 @@ namespace NineDigit.ChduLite
     /// </summary>
     public class ChduLiteStatus
     {
-        readonly ChduLiteStatusFlags flags;
         readonly byte[] payload;
 
         internal ChduLiteStatus(ResponseMessage message)
@@ -22,9 +21,11 @@ namespace NineDigit.ChduLite
             if (this.payload.Length != 24)
                 throw new ArgumentException("Unexpected response message payload length", nameof(message));
 
-            this.flags = (ChduLiteStatusFlags)BitConverter.ToUInt16(payload, 2);
+            this.Flags = (ChduLiteStatusFlags)BitConverter.ToUInt16(payload, 2);
             this.Version = new(payload[1], payload[0]);
         }
+
+        internal ChduLiteStatusFlags Flags { get; }
 
         /// <summary>
         /// Verzia firmvéru
@@ -39,12 +40,12 @@ namespace NineDigit.ChduLite
         /// <summary>
         /// Zariadenie naštartovalo v poriadku a je pripravené na použitie.
         /// </summary>
-        public bool IsStorageReady => this.flags.HasFlag(ChduLiteStatusFlags.STORAGE_OK);
+        public bool IsStorageReady => this.Flags.HasFlag(ChduLiteStatusFlags.STORAGE_OK);
 
         /// <summary>
         /// Zariadenie je uzamknuté, zápis nie je možný.
         /// </summary>
-        public bool IsDeviceLocked => this.flags.HasFlag(ChduLiteStatusFlags.DEVICE_LOCK);
+        public bool IsDeviceLocked => this.Flags.HasFlag(ChduLiteStatusFlags.DEVICE_LOCK);
 
         /// <summary>
         /// Zariadenie je v stave, ktorý nepodporuje zápis.
@@ -55,12 +56,12 @@ namespace NineDigit.ChduLite
         /// <summary>
         /// Tlačiareň je pripravená.
         /// </summary>
-        public bool IsPrinterReady => this.flags.HasFlag(ChduLiteStatusFlags.PRINTER_READY);
+        public bool IsPrinterReady => this.Flags.HasFlag(ChduLiteStatusFlags.PRINTER_READY);
 
         /// <summary>
         /// Konfigurácia portu RS232 je neplatná, výstup RS232 je neaktívny.
         /// </summary>
-        public bool? IsPrinterInitializationInvalid => this.flags.HasFlag(ChduLiteStatusFlags.PRINTER_INVALID);
+        public bool? IsPrinterInitializationInvalid => this.Flags.HasFlag(ChduLiteStatusFlags.PRINTER_INVALID);
 
         /// <summary>
         /// Inidkuje, či dvierka na tlačiarni sú otvorené.
@@ -103,7 +104,12 @@ namespace NineDigit.ChduLite
         public bool? IsPrinterInErrorState => this.GetSupportedStatusFlagOrNull(ChduLiteStatusFlags.PRINTER_ERROR);
 
         private bool? GetSupportedStatusFlagOrNull(ChduLiteStatusFlags flag)
-            => flag.IsSupportedIn(this.Version) ? this.flags.HasFlag(flag) : null;
+        {
+            if (this.Flags.HasFlag(flag))
+                return true;
+
+            return flag.IsSupportedIn(this.Version) ? false : null;
+        }
 
         /// <summary>
         /// Unikátne sériové číslo zariadenia.

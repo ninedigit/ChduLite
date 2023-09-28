@@ -5,12 +5,14 @@ using System.Diagnostics;
 
 var timeout = TimeSpan.FromMilliseconds(1200);
 
-using var chdu = new Chdu("COM11", 38400, timeout); // /dev/ttyS0
+var printerBaudRate = 38400;
+using var chdu = new Chdu("COM11", printerBaudRate, timeout); // /dev/ttyS0
 
 var cancellationToken = CancellationToken.None;
 var status = await chdu.GetStatusAsync(cancellationToken).ConfigureAwait(true);
 
 Console.WriteLine("Status flags: ");
+Console.WriteLine(" - " + nameof(status.Flags) + ": " + status.Flags);
 Console.WriteLine(" - " + nameof(status.IsStorageReady) + ": " + status.IsStorageReady);
 Console.WriteLine(" - " + nameof(status.IsDeviceLocked) + ": " + status.IsDeviceLocked);
 Console.WriteLine(" - " + nameof(status.IsPrinterReady) + ": " + status.IsPrinterReady);
