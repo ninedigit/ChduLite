@@ -66,3 +66,4 @@ node_modules/
 *.wixobj
 *.wxs
 /NineDigit.ChduLite/NineDigit.ChduLite.xml
+/._NineDigit.ChduLite.sln

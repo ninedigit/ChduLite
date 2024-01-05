@@ -61,12 +61,20 @@ while (true)
                 Console.WriteLine("Firmware: ");
                 Console.WriteLine(" - " + nameof(status.Version) + ": " + status.Version);
                 Console.WriteLine(" - " + nameof(status.VersionString) + ": " + status.VersionString);
-                var firmwareVersionDescription = await chdu.GetFirmwareVersionDescriptionAsync(cancellationToken);
-                Console.WriteLine($" - Firmware description: {firmwareVersionDescription}");
-                Console.WriteLine("Volume info: ");
-                var volumeInfo = await chdu.GetVolumeInfoAsync(cancellationToken).ConfigureAwait(true);
-                var manufacturingDate = volumeInfo.GetManufacturingDateUtc();
-                Console.WriteLine($" - Manufacturing date: {manufacturingDate}");
+
+                if (status.Version >= new Version(1, 3))
+                {
+                    var firmwareVersionDescription = await chdu.GetFirmwareVersionDescriptionAsync(cancellationToken);
+                    Console.WriteLine($" - Firmware description: {firmwareVersionDescription}");
+                }
+                if (status.Version >= new Version(1, 1))
+                {
+                    var volumeInfo = await chdu.GetVolumeInfoAsync(cancellationToken).ConfigureAwait(true);
+                    var manufacturingDate = volumeInfo.GetManufacturingDateUtc();
+                    Console.WriteLine("Volume info: ");
+                    Console.WriteLine($" - Manufacturing date: {manufacturingDate}");
+                }
+
                 var usedBlocksCount = status.GetUsedBlocksCount();
                 Console.WriteLine($" - USed blocks count: {usedBlocksCount}");
                 break;
