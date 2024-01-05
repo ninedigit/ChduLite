@@ -24,7 +24,7 @@ namespace NineDigit.ChduLite.Commands
         public sealed override uint ResponseBlocksCount => 1;
 
         protected override byte[] GetArguments()
-            => this.blockContent.GetRawData();
+            => this.blockContent.GetDataToStore();
 
         public sealed override BlockWriteResult ProcessResponse(ResponseMessage[] response)
         {

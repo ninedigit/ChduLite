@@ -27,18 +27,18 @@ namespace NineDigit.ChduLite
             IsCrcValid = responseMessage.IsCrcValid;
 
             var commandId = (ChduLiteCommandId)responseMessage.GetPayloadContentAt(0);
+            var storedData = responseMessage.GetPayloadContent(offset: 1);
+            
             WriteMode = commandId.ToBlockWriteMode();
 
             switch (commandId)
             {
                 case ChduLiteCommandId.WriteData:
                 case ChduLiteCommandId.WriteDataAndPrint:
-                    Content = new BlockContent(responseMessage.GetPayloadContent(offset: 1));
+                    Content = BlockContent.FromStoredData(storedData);
                     break;
                 case ChduLiteCommandId.WriteDataAndPrintWithOffset:
-                    var offsetData = responseMessage.GetPayloadContent(offset: 1, length: 2);
-                    var offset = BitConverter.ToUInt16(offsetData, 0);
-                    Content = new OffsettedBlockContent(offset, responseMessage.GetPayloadContent(offset: 3));
+                    Content = OffsettedBlockContent.FromStoredData(storedData);
                     break;
                 default:
                     throw new InvalidOperationException("Unknown command id received when reading block.");
