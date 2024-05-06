@@ -67,3 +67,4 @@ node_modules/
 *.wxs
 /NineDigit.ChduLite/NineDigit.ChduLite.xml
 /._NineDigit.ChduLite.sln
+/CodeSignTool.props

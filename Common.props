@@ -1,12 +1,8 @@
-﻿<Project>
-    <ItemGroup>
-        <CertKeyFile Include="$(SolutionDir)certificate.key"/>
-    </ItemGroup>
-
-    <Target Name="ReadCertKeyFile">
-        <ReadLinesFromFile File="@(CertKeyFile)">
-            <Output TaskParameter="Lines"
-                    ItemName="CertPwd" />
-        </ReadLinesFromFile>
-    </Target>
+<Project>
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <Version>1.0.0</Version>
+    <NoWarn>$(NoWarn);CS1591;CS0436</NoWarn>
+	<AbpProjectType>app</AbpProjectType>
+  </PropertyGroup>
 </Project>
