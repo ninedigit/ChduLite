@@ -103,6 +103,10 @@ namespace NineDigit.ChduLite.Transport
             {
                 throw new ChduLiteTransportException($"Aplikácia nedokáže nadviazať spojenie s dátovym úložiskom. Uistite sa, že úložisko je pripojené na porte {ex.PortName}.", ex);
             }
+            catch (TransportException ex) when (ex.InnerException is ReadTimeoutException timeoutEx)
+            {
+                throw new ChduLiteTransportException($"Odpoveď z dátového úložiska neprišla v stanovenom limite ({timeoutEx.Timeout} ms).", ex);
+            }
             catch (TransportException ex)
             {
                 throw new ChduLiteTransportException("Nastala transportná chyba pri komunikácii s chráneným dátovým úložiskom.", ex);
