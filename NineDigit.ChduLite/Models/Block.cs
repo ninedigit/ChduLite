@@ -16,12 +16,22 @@ namespace NineDigit.ChduLite
         /// </summary>
         public const int MaxRawDataLength = ResponseMessage.HeaderLength + 1 + BlockContent.MaxLength;
 
+        /// <summary>
+        /// One byte represents block type + at least one content byte
+        /// </summary>
+        internal const int MinPayloadLength = 2;
+
+        /// <summary>
+        /// One byte represents block type + up to 505 content bytes
+        /// </summary>
+        internal const int MaxPayloadLength = 1 + BlockContent.MaxLength;
+
         internal Block(ResponseMessage responseMessage)
         {
             this.responseMessage = responseMessage
                 ?? throw new ArgumentNullException(nameof(responseMessage));
 
-            if (responseMessage.PayloadLength < 2) // block type + at least one content byte
+            if (responseMessage.PayloadLength < MinPayloadLength)
                 throw new ArgumentException("Response message containing block content is expected to have at least two bytes.");
 
             IsCrcValid = responseMessage.IsCrcValid;

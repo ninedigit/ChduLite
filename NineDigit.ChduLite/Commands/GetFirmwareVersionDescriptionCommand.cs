@@ -13,6 +13,7 @@ namespace NineDigit.ChduLite.Commands
         { }
 
         public override uint ResponseBlocksCount => 1;
+        public override uint MinResponseDataBytes => 2; // non-empty null terminated string
 
         public override string ProcessResponse(ResponseMessage[] response)
         {

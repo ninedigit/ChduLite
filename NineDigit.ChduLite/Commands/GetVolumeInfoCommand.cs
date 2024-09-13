@@ -9,6 +9,7 @@ namespace NineDigit.ChduLite.Commands
         { }
 
         public override uint ResponseBlocksCount => 1;
+        public override uint MinResponseDataBytes => ChduLiteVolumeInfo.PayloadLength;
 
         public override ChduLiteVolumeInfo ProcessResponse(ResponseMessage[] response)
         {

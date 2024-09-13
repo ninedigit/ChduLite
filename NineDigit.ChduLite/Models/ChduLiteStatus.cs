@@ -11,6 +11,8 @@ namespace NineDigit.ChduLite
     {
         readonly byte[] payload;
 
+        internal const int PayloadLength = 24;
+
         internal ChduLiteStatus(ResponseMessage message)
         {
             if (message is null)
@@ -18,7 +20,7 @@ namespace NineDigit.ChduLite
 
             this.payload = message.GetPayloadContent();
 
-            if (this.payload.Length != 24)
+            if (this.payload.Length != PayloadLength)
                 throw new ArgumentException("Unexpected response message payload length", nameof(message));
 
             this.Flags = (ChduLiteStatusFlags)BitConverter.ToUInt16(payload, 2);

@@ -29,9 +29,9 @@ namespace NineDigit.ChduLite.Transport
 
         public async Task<TResponse> ExecuteCommandAsync<TResponse>(ChduLiteCommand<TResponse> command, CancellationToken cancellationToken)
         {
-            await this.ExecuteCommandAsync(command as ChduLiteCommand, cancellationToken).ConfigureAwait(false);
+            await this.ExecuteCommandAsync((ChduLiteCommand)command, cancellationToken).ConfigureAwait(false);
             
-            var response = await this.ReadCommandResponseAsync(command.ResponseBlocksCount, cancellationToken).ConfigureAwait(false);
+            var response = await this.ReadCommandResponseAsync(command, cancellationToken).ConfigureAwait(false);
 
             return command.ProcessResponse(response);
         }
@@ -113,10 +113,14 @@ namespace NineDigit.ChduLite.Transport
             }
         }
 
-        private async Task<ResponseMessage[]> ReadCommandResponseAsync(uint expectedBlocksCount, CancellationToken cancellationToken)
+        private async Task<ResponseMessage[]> ReadCommandResponseAsync(IChduLiteResponseCommand command, CancellationToken cancellationToken)
         {
+            if (command is null)
+                throw new ArgumentNullException(nameof(command));
+
             cancellationToken.ThrowIfCancellationRequested();
 
+            var expectedBlocksCount = command.ResponseBlocksCount;
             var result = new ResponseMessage[expectedBlocksCount];
 
             try
@@ -133,10 +137,10 @@ namespace NineDigit.ChduLite.Transport
                         throw new UnexpectedDeviceResponseException($"Unexpected start byte: '{startByte}'.");
 
                     int receivedBytesCount = 0;
-                    int totalBytesToRead = 2;
+                    int totalBytesToRead = (int)command.MinResponseDataBytes + ResponseMessage.HeaderLength;
                     var totalBytesToReadParsePending = true;
 
-                    // Nacitame dlzku a potom zbytok spravy
+                    // nacitame hlavicku (prve dva bajty obsahujuce celkovu dlzku) + minimalnu dlzku odpovede. Nasledne precitame zbytok spravy.
                     while (receivedBytesCount < totalBytesToRead)
                     {
                         receivedBytesCount += await this.transport.ReadAsync(
@@ -146,37 +150,43 @@ namespace NineDigit.ChduLite.Transport
                             cancellationToken: cancellationToken)
                             .ConfigureAwait(false);
 
-                        if (receivedBytesCount >= 2 && totalBytesToReadParsePending)
+                        if (totalBytesToReadParsePending && ResponseMessage.TryParsePayloadLength(currentBlock, out int payloadLength))
                         {
-                            if (ResponseMessage.TryParsePayloadLength(currentBlock, out int payloadLength))
-                            {
-                                totalBytesToRead = payloadLength + 2;
-                                totalBytesToReadParsePending = false;
-                            }
+                            totalBytesToRead = payloadLength + ResponseMessage.HeaderLength;
+                            totalBytesToReadParsePending = false;
                         }
                     }
 
-                    // Odoslem potvrdenie prijatia bloku:
-                    // - ACK: ak bol blok v poriadku
-                    // - NAK: ak by blok nebol v poriadku a chceme ho prijat znovu (max. 8 krat)
-                    // - NUL: ak chceme prerusit prenos
-                    if (cancellationToken.IsCancellationRequested)
+                    // Odpoved na prijatie packetu sa pouziva len v pripade prikazov, ktorych odpovede su rozdelene do viacerych packetov (aktualne len pri READ)
+                    var sendPacketReceivedConfirmation = command.SupportsMultiPacketTransfer;
+                    if (sendPacketReceivedConfirmation)
                     {
-                        await this.transport.WriteOneAsync((byte)ControlChars.NUL, CancellationToken.None).ConfigureAwait(false);
-                        cancellationToken.ThrowIfCancellationRequested();
+                        // Pri prikaze "READ" musime do 1 sekundy od prijatia bloku odpovedat stavom:
+                        // - ACK: ak bol blok v poriadku
+                        // - NAK: ak by blok nebol v poriadku a chceme ho prijat znovu (max. 8 krat)
+                        // - NUL: ak chceme prerusit prenos
+                        if (cancellationToken.IsCancellationRequested)
+                        {
+                            await this.transport.WriteOneAsync((byte)ControlChars.NUL, CancellationToken.None).ConfigureAwait(false);
+                            cancellationToken.ThrowIfCancellationRequested();
+                        }
+                        else
+                        {
+                            await this.transport.WriteOneAsync((byte)ControlChars.ACK, cancellationToken).ConfigureAwait(false);
+                        }
                     }
-                    
-                    await this.transport.WriteOneAsync((byte)ControlChars.ACK, cancellationToken).ConfigureAwait(false);
 
                     // Nacitam end byte
                     var endByte = await this.transport.ReadOneAsync(cancellationToken).ConfigureAwait(false);
+
+                    // this.logger.LogDebug("Received end byte: {endbyte} (packet {packet}/{packetsCount})", endByte, currentBlockIndex + 1, expectedBlocksCount);
 
                     // Overim end byte
                     if (endByte == ControlChars.BEL)
                         result[currentBlockIndex] = new ResponseMessage(currentBlock, isCrcValid: false);
                     else if (endByte == ControlChars.ACK || endByte == ControlChars.EOT)
                         result[currentBlockIndex] = new ResponseMessage(currentBlock, isCrcValid: true);
-                    else
+                    else // (NAK or other)
                         throw new UnexpectedDeviceResponseException($"Unexpected end byte '{endByte}' while reading block {currentBlockIndex + 1} out of {expectedBlocksCount}.");
 
                     if (endByte == ControlChars.EOT && currentBlockIndex + 1 < expectedBlocksCount)

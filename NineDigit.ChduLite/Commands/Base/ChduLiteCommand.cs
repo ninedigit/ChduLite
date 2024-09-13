@@ -36,13 +36,28 @@ namespace NineDigit.ChduLite.Commands
         }
     }
 
-    internal abstract class ChduLiteCommand<TResponse> : ChduLiteCommand
+    internal interface IChduLiteResponseCommand
+    {
+        uint ResponseBlocksCount { get; }
+        /// <summary>
+        /// Gets minimal number of data bytes in command response (excluding STX, two bytes for length and EOT).
+        /// </summary>
+        uint MinResponseDataBytes { get; }
+        /// <summary>
+        /// Gets whether packet confirmation is required by device.
+        /// </summary>
+        bool SupportsMultiPacketTransfer { get; }
+    }
+
+    internal abstract class ChduLiteCommand<TResponse> : ChduLiteCommand, IChduLiteResponseCommand
     {
         internal ChduLiteCommand(ChduLiteCommandId id)
             : base(id)
         { }
 
         public abstract uint ResponseBlocksCount { get; }
+        public abstract uint MinResponseDataBytes { get; }
+        public virtual bool SupportsMultiPacketTransfer => false;
 
         public abstract TResponse ProcessResponse(ResponseMessage[] response);
     }

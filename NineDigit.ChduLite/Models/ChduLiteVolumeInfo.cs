@@ -9,6 +9,8 @@ namespace NineDigit.ChduLite
     {
         readonly byte[] payload;
 
+        internal const int PayloadLength = 4;
+
         internal ChduLiteVolumeInfo(ResponseMessage message)
         {
             if (message is null)
@@ -16,8 +18,8 @@ namespace NineDigit.ChduLite
 
             this.payload = message.GetPayloadContent();
 
-            if (this.payload.Length < 4)
-                throw new ArgumentException("Unexpected response message payload length. At least 4 bytes expected.", nameof(message));
+            if (this.payload.Length < PayloadLength)
+                throw new ArgumentException("Unexpected response message payload length. 4 bytes expected.", nameof(message));
         }
 
         /// <summary>

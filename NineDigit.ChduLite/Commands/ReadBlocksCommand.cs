@@ -10,6 +10,8 @@ namespace NineDigit.ChduLite.Commands
 
         // note: tato info nie je sucastou specky, ale zariadenie vrati najviac 127 blokov na jeden prikaz,
         // pricom pri prijati priakzu vrati ACK (na strane fw chyba kontrola vstupov?)
+        
+        // note2: zariadenie dokaz vratit aj viac, ale priblizne pri 975 bloku to moze spadnut.
         public const uint MaxBlocksCount = 127;
 
         public ReadBlocksCommand(BlockAddress address, uint blocksCount)
@@ -25,6 +27,8 @@ namespace NineDigit.ChduLite.Commands
         }
 
         public override uint ResponseBlocksCount => this.blocksCount;
+        public override uint MinResponseDataBytes => Block.MinPayloadLength;
+        public override bool SupportsMultiPacketTransfer => true;
 
         public override Block[] ProcessResponse(ResponseMessage[] messages)
         {

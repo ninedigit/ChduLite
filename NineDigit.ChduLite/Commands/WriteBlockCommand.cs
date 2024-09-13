@@ -22,6 +22,7 @@ namespace NineDigit.ChduLite.Commands
         }
 
         public sealed override uint ResponseBlocksCount => 1;
+        public override uint MinResponseDataBytes => BlockWriteResult.PayloadLength;
 
         protected override byte[] GetArguments()
             => this.blockContent.GetDataToStore();

@@ -9,12 +9,14 @@ namespace NineDigit.ChduLite
     {
         readonly ResponseMessage message;
 
+        internal const int PayloadLength = 4;
+
         internal BlockWriteResult(ResponseMessage message)
         {
             this.message = message
                 ?? throw new ArgumentNullException(nameof(message));
 
-            if (message.PayloadLength != 4)
+            if (message.PayloadLength != PayloadLength)
                 throw new ArgumentException("Neočakávaná dĺžka odpovede o výsledku zápisu.", nameof(message));
         }
 
