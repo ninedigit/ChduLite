@@ -116,7 +116,7 @@ while (true)
                 }
                 break;
             case 5:
-                var multipleBlocks = await chdu.ReadBlocksAsync(address: 980, blocksCount: 20, cancellationToken);
+                var multipleBlocks = await chdu.ReadBlocksAsync(address: 0, blocksCount: 20, cancellationToken);
                 break;
             default:
                 logger.LogWarning("Unknown option selected.");

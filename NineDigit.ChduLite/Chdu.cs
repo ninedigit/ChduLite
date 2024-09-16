@@ -72,11 +72,14 @@ namespace NineDigit.ChduLite
         /// <returns>Pole blokov</returns>
         public async Task<Block[]> ReadBlocksAsync(BlockAddress address, uint blocksCount, CancellationToken cancellationToken)
         {
+            // note: pre zvysenie stability vyziadavame naraz maximalne 127 blokov. Device vsak podporuje uint.MaxValue.
+            const int maxSafeBlocksCount = 127;
+            
             await this.commandLock.WaitAsync(cancellationToken).ConfigureAwait(false);
 
             try
             {
-                if (blocksCount < ReadBlocksCommand.MaxBlocksCount)
+                if (blocksCount < maxSafeBlocksCount)
                 {
                     var cmd = new ReadBlocksCommand(address, blocksCount);
                     return await this.commandTransport.ExecuteCommandAsync(cmd, cancellationToken).ConfigureAwait(false);
@@ -86,7 +89,7 @@ namespace NineDigit.ChduLite
                 var blocksProcessed = 0u;
                 while (blocksProcessed < blocksCount)
                 {
-                    var blocksToRead = Math.Min(blocksCount - blocksProcessed, ReadBlocksCommand.MaxBlocksCount);
+                    var blocksToRead = Math.Min(blocksCount - blocksProcessed, maxSafeBlocksCount);
                     var addr = address + blocksProcessed;
                     var cmd = new ReadBlocksCommand(addr, blocksToRead);
                     var blocks = await this.commandTransport.ExecuteCommandAsync(cmd, cancellationToken).ConfigureAwait(false);

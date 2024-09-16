@@ -158,7 +158,7 @@ namespace NineDigit.ChduLite.Transport
                     }
 
                     // Odpoved na prijatie packetu sa pouziva len v pripade prikazov, ktorych odpovede su rozdelene do viacerych packetov (aktualne len pri READ)
-                    var sendPacketReceivedConfirmation = command.SupportsMultiPacketTransfer;
+                    var sendPacketReceivedConfirmation = command.IsMultiPacketTransferSupported;
                     if (sendPacketReceivedConfirmation)
                     {
                         // Pri prikaze "READ" musime do 1 sekundy od prijatia bloku odpovedat stavom:
@@ -190,7 +190,7 @@ namespace NineDigit.ChduLite.Transport
                         throw new UnexpectedDeviceResponseException($"Unexpected end byte '{endByte}' while reading block {currentBlockIndex + 1} out of {expectedBlocksCount}.");
 
                     if (endByte == ControlChars.EOT && currentBlockIndex + 1 < expectedBlocksCount)
-                        throw new IncompleteDataException($"Bolo prijatých iba {currentBlockIndex} blokov z očakávaných {expectedBlocksCount}.");
+                        throw new IncompleteDataException($"Bolo prijatých iba {currentBlockIndex + 1} blokov z očakávaných {expectedBlocksCount}.");
                 }
 
                 this.transport.DiscardBuffers();

@@ -46,7 +46,7 @@ namespace NineDigit.ChduLite.Commands
         /// <summary>
         /// Gets whether packet confirmation is required by device.
         /// </summary>
-        bool SupportsMultiPacketTransfer { get; }
+        bool IsMultiPacketTransferSupported { get; }
     }
 
     internal abstract class ChduLiteCommand<TResponse> : ChduLiteCommand, IChduLiteResponseCommand
@@ -57,7 +57,7 @@ namespace NineDigit.ChduLite.Commands
 
         public abstract uint ResponseBlocksCount { get; }
         public abstract uint MinResponseDataBytes { get; }
-        public virtual bool SupportsMultiPacketTransfer => false;
+        public virtual bool IsMultiPacketTransferSupported => false;
 
         public abstract TResponse ProcessResponse(ResponseMessage[] response);
     }
