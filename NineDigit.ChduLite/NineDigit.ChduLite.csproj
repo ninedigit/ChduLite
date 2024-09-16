@@ -30,7 +30,7 @@
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>
         <IncludeSymbols>true</IncludeSymbols>
-        <Copyright>(c) 2023</Copyright>
+        <Copyright>(c) 2024</Copyright>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     </PropertyGroup>
 
