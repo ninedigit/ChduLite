@@ -39,7 +39,7 @@ namespace NineDigit.ChduLite
         {
         }
         
-        internal Chdu(ITransport transport, bool ownsTransport, ILoggerFactory loggerFactory)
+        public Chdu(ITransport transport, bool ownsTransport, ILoggerFactory loggerFactory)
         {
             this.serialTransport = transport ?? throw new ArgumentNullException(nameof(transport));
             this.commandTransportInitializer = new CommandTransportInitializer(transport);
